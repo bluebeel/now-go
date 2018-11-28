@@ -1,15 +1,23 @@
 {
   "name": "@bluebeel/go",
-  "version": "0.3.2",
+  "version": "1.0.5",
+  "homepage": "https://github.com/bluebeel/now-go",
+  "license" : "MIT",
+  "keywords": [ "now", "serverless", "go", "golang", "zeit" ],
+  "author": {
+    "email": "sbluebeel@gmail.com",
+    "name": "Saïkou Barry"
+  },
   "scripts": {
     "test": "best -I test/*.js",
-    "prepublish": "./build.sh"
+    "postinstall": "./build.sh"
   },
   "files": [
-    "bin",
+    "build.sh",
     "download-go-bin.js",
     "index.js",
-    "main.go"
+    "main.go",
+    "util"
   ],
   "dependencies": {
     "execa": "^1.0.0",
@@ -25,5 +33,9 @@
   },
   "peerDependencies": {
     "@now/build-utils": "^0.4.30"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluebeel/now-go.git"
   }
 }

@@ -4,7 +4,17 @@ const fetch = require('node-fetch')
 const tar = require('tar')
 const getWritableDirectory = require('@now/build-utils/fs/get-writable-directory.js');
 
-const url = 'https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz'
+var url;
+switch(process.platform) {
+  case "win32":
+      url = "https://dl.google.com/go/go1.11.2.windows-amd64.zip";
+      break;
+  case "darwin":
+      url = "https://dl.google.com/go/go1.11.2.darwin-amd64.tar.gz";
+      break;
+  default:
+      url = 'https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz'
+}
 
 module.exports = async () => {
   const res = await fetch(url)
