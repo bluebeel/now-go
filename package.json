@@ -1,6 +1,6 @@
 {
   "name": "@bluebeel/go",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "homepage": "https://github.com/bluebeel/now-go",
   "license" : "MIT",
   "keywords": [ "now", "serverless", "go", "golang", "zeit" ],
@@ -9,10 +9,11 @@
     "name": "Saïkou Barry"
   },
   "scripts": {
-    "test": "best -I test/*.js",
-    "postinstall": "./build.sh"
+    "preinstall": "./build.sh",
+    "test": "best -I test/*.js"
   },
   "files": [
+    "bin",
     "build.sh",
     "download-go-bin.js",
     "index.js",
