@@ -5,7 +5,8 @@ const execa = require('execa')
 const { createLambda } = require('@now/build-utils/lambda.js');
 const getWritableDirectory = require('@now/build-utils/fs/get-writable-directory.js');
 const download = require('@now/build-utils/fs/download.js');
-const downloadGoBin = require("./download-go-bin")
+const downloadGit = require("lambda-git")
+const downloadGoBin = require("./download-go-bin");
 const glob = require('@now/build-utils/fs/glob.js');
 
 const goFilenames = new Set([
@@ -26,6 +27,7 @@ async function createGoPathTree(goPath) {
 exports.build = async ({files, entrypoint, config}) => {
   console.log('downloading files...')
 
+  const gitPath = await getWritableDirectory()
   const goPath = await getWritableDirectory()
   const srcPath = path.join(goPath, 'src', 'lambda')
   const outDir = await getWritableDirectory()
@@ -37,17 +39,28 @@ exports.build = async ({files, entrypoint, config}) => {
   console.log('downloading go binary...')
   const goBin = await downloadGoBin()
 
+  console.log('downloading git binary...')	
+  // downloads a git binary that works on Amazon Linux and sets	
+  // `process.env.GIT_EXEC_PATH` so `go(1)` can see it	
+  await downloadGit({targetDirectory: gitPath})
+
   const goEnv = {
     ...process.env,
     GOOS: 'linux',
     GOARCH: 'amd64',
-    GOPATH: goPath,
-    GO111MODULE:'on' // add go module support
+    GOPATH: goPath
   }
 
   console.log(`parsing AST for \"${entrypoint}\"`)
   let handlerFunctionName = ''
   try {
+    // let's build the get-export-function-name binary
+    await execa(goBin, [
+      'build',
+      '-o', path.join('bin', 'get-exported-function-name'),
+      './util'
+    ], {cwd: __dirname})
+    // use it
     handlerFunctionName = await execa.stdout(
       path.join(__dirname, 'bin', 'get-exported-function-name'),
       [files[entrypoint].fsPath]
@@ -92,6 +105,16 @@ exports.build = async ({files, entrypoint, config}) => {
   // Go doesn't like to build files in different directories,
   // so now we place `main.go` together with the user code
   await writeFile(path.join(entrypointDirname, mainGoFileName), mainGoContents)
+
+  console.log('installing dependencies')	
+  // `go get` will look at `*.go` (note we set `cwd`), parse	
+  // the `import`s and download any packages that aren't part of the stdlib	
+  try {	
+    await execa(goBin, ['get'], {env: goEnv, cwd: entrypointDirname, stdio: 'inherit'});	
+  } catch (err) {
+    console.log('failed to `go get`')	
+    throw err	
+  }
 
   console.log('running go build...')
   try {
