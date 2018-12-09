@@ -48,7 +48,8 @@ exports.build = async ({files, entrypoint, config}) => {
     ...process.env,
     GOOS: 'linux',
     GOARCH: 'amd64',
-    GOPATH: goPath
+    GOPATH: goPath,
+    GO111MODULE: 'on'
   }
 
   console.log(`parsing AST for \"${entrypoint}\"`)

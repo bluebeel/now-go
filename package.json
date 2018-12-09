@@ -1,6 +1,6 @@
 {
   "name": "@bluebeel/go",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "homepage": "https://github.com/bluebeel/now-go",
   "license" : "MIT",
   "keywords": [ "now", "serverless", "go", "golang", "zeit" ],
